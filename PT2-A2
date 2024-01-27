@@ -1,0 +1,164 @@
+//Here is the driver class
+
+public class Main {
+    public static void main(String[] args) {
+        BurgerChef burgerChef = new BurgerChef();
+        FriesChef friesChef = new FriesChef();
+        Waitress waitress = new Waitress();
+
+        Thread burgerThread = new Thread(burgerChef);
+        Thread friesThread = new Thread(friesChef);
+        Thread waitressThread = new Thread(waitress);
+
+        burgerThread.start();
+        friesThread.start();
+        waitressThread.start();
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
+
+// You are free to add any attributes or methods you need.
+public class BurgerChef implements Runnable {
+    private String name = "BurgerChef";
+    private int WAIT_TIME = 1000;
+    private int MAKE_TIME = 3000;
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(MAKE_TIME);
+                synchronized (KitchenTable.class) {
+                    while (KitchenTable.burgersLeft == 5) {
+                        KitchenTable.class.wait(WAIT_TIME);
+                    }
+                    if (KitchenTable.burgersLeft < 5) {
+                        KitchenTable.burgersLeft++;
+                        System.out.println("[Action] " + name + " add a burger on the kitchen table \n[Status] burgers left: " + KitchenTable.burgersLeft);
+                        KitchenTable.class.notifyAll();
+                    }
+                    if (KitchenTable.friesLeft >= 1 && ReadyTable.mealsLeft < ReadyTable.limit) {
+                        synchronized (ReadyTable.class) {
+                            KitchenTable.burgersLeft--;
+                            KitchenTable.friesLeft--;
+                            ReadyTable.mealsLeft++;
+                            System.out.println("-----------------------------------------------------------------------------");
+                            System.out.println("[Action] " + name + " makes Burger and Fries and place it on the ready table \n[Status] burgers left: "
+                                    + KitchenTable.burgersLeft + ", fries left: "
+                                    + KitchenTable.friesLeft + ", meals left: "
+                                    + ReadyTable.mealsLeft
+                                    + "\n=============================================================================");
+                            ReadyTable.class.notifyAll();
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
+
+// You are free to add any attributes or methods you need.
+public class FriesChef implements Runnable {
+    private String name = "FriesChef";
+    private int WAIT_TIME = 1000;
+    private int MAKE_TIME = 2000;
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(MAKE_TIME);
+                synchronized (KitchenTable.class) {
+                    while (KitchenTable.friesLeft == 5) {
+                        KitchenTable.class.wait(WAIT_TIME);
+                    }
+                    if (KitchenTable.friesLeft < 5) {
+                        KitchenTable.friesLeft++;
+                        System.out.println("[Action] " + name + " add a fries on the kitchen table \n[Status] fries left: " + KitchenTable.friesLeft);
+                        KitchenTable.class.notifyAll();
+                    }
+                    if (KitchenTable.burgersLeft >= 1 && ReadyTable.mealsLeft < ReadyTable.limit) {
+                        synchronized (ReadyTable.class) {
+                            KitchenTable.burgersLeft--;
+                            KitchenTable.friesLeft--;
+                            ReadyTable.mealsLeft++;
+                            System.out.println("-----------------------------------------------------------------------------");
+                            System.out.println("[Action] " + name + " makes Burger and Fries and place it on the ready table \n[Status] burgers left: "
+                                    + KitchenTable.burgersLeft + ", fries left: "
+                                    + KitchenTable.friesLeft + ", meals left: "
+                                    + ReadyTable.mealsLeft
+                                    + "\n=============================================================================");
+                            ReadyTable.class.notifyAll();
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
+
+//A work table which for chefs to place Burgers or Fries.
+//You need to handle race condition here.
+public class KitchenTable {
+	public static int limit = 10;
+	public static int burgersLeft = 0;
+	public static int friesLeft = 0;
+}
+
+----------------------------------------------------------------------------------------------------------------
+
+//A table which the meals are put as soon as they become ready
+//You need to handle race condition here.
+ public class ReadyTable {
+     public static int limit = 3;
+     public static int mealsLeft = 0;
+
+ }
+
+----------------------------------------------------------------------------------------------------------------
+
+// You are free to add any attributes or methods you need.
+public class Waitress implements Runnable {
+    private String name = "Waitress";
+    private int WAIT_TIME = 1000;
+    private int SERVE_TIME = 10000; // 10 second
+
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                synchronized (ReadyTable.class) {
+                    while (ReadyTable.mealsLeft == 0) {
+                        ReadyTable.class.wait();
+                    }
+                    if (ReadyTable.mealsLeft > 0) {
+                        ReadyTable.mealsLeft--;
+                        System.out.println("[Action] " + name + " serves a meal from the ready table \n[Status] meals left: " + ReadyTable.mealsLeft);
+                        ReadyTable.class.notifyAll();
+                    }
+                }
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
