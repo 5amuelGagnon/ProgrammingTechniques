@@ -1,0 +1,65 @@
+import java.util.ArrayList;
+public class A1 {
+
+
+        public static void main(String[] args) {
+            System.out.println(crazySeries(10));
+            System.out.println(benNumber(3, 5));
+    }
+    	public static int benNumber(int a, int b) {
+            int x = a;
+            int y = b;
+                if (x <= 0 || y <= 0) {
+                    return 0;
+                }
+                if (y == 1) {
+                    return x;
+                }
+                if (x % 2 == 0) {
+                    return benNumber(x * 2, y - 1) + x;
+                } else {
+                    return benNumber(x - 1, y - 1) + x;
+                }
+            }
+
+
+        public static ArrayList<Double> crazySeries(double start) {
+            ArrayList<Double> result = new ArrayList<>();
+            if (start <= 0) {
+                return result;
+            }
+            result.add(start);
+            if (start > 100) {
+                result.addAll(crazySeriesDivide(start));
+            } else {
+                result.addAll(crazySeriesMultiply(start));
+            }
+            return result;
+        }
+
+        private static ArrayList<Double> crazySeriesDivide(double start) {
+            ArrayList<Double> result = new ArrayList<>();
+            start /= 3;
+            if (start < 5) {
+                result.add(start);
+                return result;
+            }
+            result.add(start);
+            result.addAll(crazySeriesDivide(start));
+            return result;
+        }
+
+        private static ArrayList<Double> crazySeriesMultiply(double start) {
+            ArrayList<Double> result = new ArrayList<>();
+            start *= 2;
+            if (start > 100) {
+                result.add(start);
+                result.addAll(crazySeriesDivide(start));
+                return result;
+            }
+            result.add(start);
+            result.addAll(crazySeriesMultiply(start));
+            return result;
+        }
+
+    }
