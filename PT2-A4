@@ -1,0 +1,456 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Please enter the name for your hotel:");
+        String hotelName = sc.nextLine();
+        Hotel hotel = new Hotel(hotelName);
+
+        while (true) {
+            System.out.println("Welcome to " + hotel.getName(hotelName) + " hotel maker, please select the room you would like to have in your hotel.");
+            System.out.println("1: Single Room $50");
+            System.out.println("2: Double Room $80");
+            System.out.println("3: Deluxe Room $100");
+            System.out.println("4: Done, go to reservation");
+            int roomType = sc.nextInt();
+            sc.nextLine();
+
+            if (roomType == 4) {
+                break;
+            }
+
+            Room newRoom = null;
+            if (roomType == 1) {
+                newRoom = new SingleRoom();
+            } else if (roomType == 2) {
+                newRoom = new DoubleRoom();
+            } else if (roomType == 3) {
+                newRoom = new DeluxeRoom();
+            }
+
+            while (true) {
+                System.out.println("What feature the room has?");
+                System.out.println("1: With view $50");
+                System.out.println("2: With Netflix access $20");
+                System.out.println("3: Nothing");
+                System.out.println("4: Done");
+                int feature = sc.nextInt();
+                sc.nextLine();
+
+                if (feature == 4) {
+                    break;
+                }
+
+                switch (feature) {
+                    case 1:
+                        newRoom = new RoomWithView(newRoom);
+                        break;
+                    case 2:
+                        newRoom = new RoomWithNetflix(newRoom);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!hotel.addRoom(newRoom)) {
+                System.out.println("Sorry you already have this room.");
+            }
+        }
+
+        System.out.println("Current rooms status: ");
+        System.out.println(hotel.getRooms());
+
+        while (true) {
+            System.out.println("Hi customer, what room would you like?:");
+            System.out.println("1: Single Room");
+            System.out.println("2: Double Room");
+            System.out.println("3: Deluxe Room");
+            System.out.println("4: Done, show hotel revenue");
+            int roomType = sc.nextInt();
+            sc.nextLine();
+
+            if (roomType == 4) {
+                System.out.println("Hotel revenue is $" + hotel.getRevenue());
+                break;
+            }
+
+            Room selectedRoom = null;
+            switch (roomType) {
+                case 1:
+                    selectedRoom = new SingleRoom();
+                    break;
+                case 2:
+                    selectedRoom = new DoubleRoom();
+                    break;
+                case 3:
+                    selectedRoom = new DeluxeRoom();
+                    break;
+                default:
+                    break;
+            }
+
+            if (!hotel.reserveRoom(selectedRoom)) {
+                System.out.println("The room is not available");
+            } else {
+                System.out.println("Reservation successful");
+            }
+
+            System.out.println("Current rooms status: ");
+            System.out.println(hotel.getRooms());
+        }
+
+        sc.close();
+    }
+
+    private static class RoomWithView extends Room {
+        public RoomWithView(Room newRoom) {
+        }
+    }
+
+    private static class RoomWithNetflix extends Room {
+        public RoomWithNetflix(Room newRoom) {
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public abstract class Room implements InterfaceRoom {
+    private RoomType roomType;
+    private int price;
+    private String description;
+    private boolean isReserved;
+
+    public Room() {
+        this.roomType = roomType;
+        this.price = price;
+        this.description = description;
+        this.isReserved = false;
+    }
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean getReservationStatus() {
+        return isReserved;
+    }
+
+    public boolean reserveTheRoom() {
+        if (!isReserved && roomType == this.roomType) {
+            isReserved = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public int getCost() {
+        return 0;
+    }
+
+    public boolean isReserved() {
+    return false;
+    }
+
+    public void reserve() {
+    }
+}
+
+
+-----------------------------------------------------------------------------------------------------------
+
+import java.util.ArrayList;
+
+public class Hotel {
+    private String name;
+    private ArrayList<Room> rooms;
+    private int revenue;
+
+    public Hotel(String name) {
+        this.name = name;
+        this.rooms = new ArrayList<>();
+        this.revenue = 0;
+    }
+
+    public String getName(String hotelName) {
+        return this.name;
+    }
+
+    public ArrayList<Room> getRooms() {
+        return this.rooms;
+    }
+
+    public boolean addRoom(Room room) {
+        if (!this.rooms.contains(room)) {
+            this.rooms.add(room);
+            this.revenue += room.getCost();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean reserveRoom(Room room) {
+        if (this.rooms.contains(room) && !room.isReserved()) {
+            room.reserve();
+            this.revenue -= room.getCost();
+            return true;
+        }
+        return false;
+    }
+
+    public int getRevenue() {
+        return this.revenue;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class SingleRoom extends Room implements InterfaceRoom {
+    private int price;
+    private String description;
+    private boolean isReserved;
+
+    public SingleRoom() {
+        super();
+        this.price = 100;
+        this.description = "Single Room";
+        this.isReserved = false;
+    }
+
+    @Override
+    public int getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public boolean getReservationStatus() {
+        return isReserved;
+    }
+
+    @Override
+    public boolean reserveTheRoom() {
+        if (!isReserved) {
+            isReserved = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class DoubleRoom extends Room implements InterfaceRoom {
+    private int price;
+    private String description;
+    private boolean isReserved;
+
+    public DoubleRoom() {
+        this.price = 150;
+        this.description = "Double Room";
+        this.isReserved = false;
+    }
+
+    @Override
+    public int getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public boolean getReservationStatus() {
+        return isReserved;
+    }
+
+    @Override
+    public boolean reserveTheRoom() {
+        if (!isReserved) {
+            isReserved = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class DeluxeRoom extends Room implements InterfaceRoom {
+    private int price;
+    private String description;
+    private boolean isReserved;
+
+    public DeluxeRoom() {
+        this.price = 250;
+        this.description = "Deluxe Room";
+        this.isReserved = false;
+    }
+
+    @Override
+    public int getPrice() {
+        return price;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public boolean getReservationStatus() {
+        return isReserved;
+    }
+
+    @Override
+    public boolean reserveTheRoom() {
+        if (!isReserved) {
+            isReserved = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class WithView extends RoomDecorator {
+    public WithView(InterfaceRoom room) {
+        super(room);
+    }
+
+    public int getPrice() {
+        return room.getPrice() + 10;
+    }
+
+    public String getDescription() {
+        return room.getDescription() + " with a view";
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class WithNetflixAccess extends RoomDecorator {
+    public WithNetflixAccess(InterfaceRoom room) {
+        super(room);
+    }
+
+    public int getPrice() {
+        return room.getPrice() + 5;
+    }
+
+    public String getDescription() {
+        return room.getDescription() + " with Netflix access";
+    }
+
+    @Override
+    public RoomType getRoomType() {
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public abstract class RoomDecorator implements InterfaceRoom {
+    protected InterfaceRoom room;
+
+    public RoomDecorator(InterfaceRoom room) {
+        this.room = room;
+    }
+
+    @Override
+    public int getPrice() {
+        return room.getPrice();
+    }
+
+    @Override
+    public String getDescription() {
+        return room.getDescription();
+    }
+
+    @Override
+    public boolean getReservationStatus() {
+        return room.getReservationStatus();
+    }
+
+    @Override
+    public boolean reserveTheRoom() {
+        return room.reserveTheRoom();
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public class RoomFactory {
+    public InterfaceRoom generateRoom(RoomType type) {
+        if (type == RoomType.SINGLE) {
+            return new SingleRoom();
+        } else if (type == RoomType.DOUBLE) {
+            return new DoubleRoom();
+        } else if (type == RoomType.DELUXE) {
+            return new DeluxeRoom();
+        }
+        return null;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public enum RoomType {
+    SINGLE,
+    DOUBLE,
+    DELUXE
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+public interface InterfaceRoom {
+    int getPrice();
+    String getDescription();
+    boolean getReservationStatus();
+    boolean reserveTheRoom();
+
+    RoomType getRoomType();
+}
+
+-----------------------------------------------------------------------------------------------------------
