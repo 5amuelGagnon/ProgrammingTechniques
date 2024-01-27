@@ -1,0 +1,219 @@
+import java.util.Scanner;
+
+public class RightTriangle {
+
+        public static void main(String[] args) {
+
+            Scanner scan = new Scanner(System.in);
+
+            System.out.print("Enter number of rows:");
+
+            // This method reads the number provided using keyboard
+            int input = scan.nextInt();
+
+            // Closing Scanner after the use
+            scan.close();
+
+            // Displaying the number
+            System.out.println("The number of rows: " + input);
+
+            // number of row = 5
+            // number of space = 4,3,2,1,0
+            // number of stars = 1,2,3,4,5
+
+            // rows
+            int i;
+            for (i = 0; i < input; i++) {
+
+                // spaces
+                for (int j = 5; j >= i; j--) {
+                    System.out.print(" ");
+                }
+                // stars
+                for (int k = 0; k <= i; k++) {
+                    System.out.print("*");
+                }
+
+                System.out.println();
+
+            }
+        }
+    }
+
+---------------------------------------------------------------------------------------
+
+import java.util.Scanner;
+public class rightReverseTriangle {
+
+        public static void main(String[] args) {
+            System.out.print("Enter number of rows:");
+
+            // This method reads the number provided using keyboard
+            Scanner scan = new Scanner(System.in);
+            int input = scan.nextInt();
+
+            // Closing Scanner after the use
+            scan.close();
+
+            // Displaying the number
+            System.out.println("The number of rows: " + input);
+
+            // number of row = 5
+            // number of space = 0,1,2,3,4
+            // number of stars = 5,4,3,2,1
+
+            // rows
+            for (int i = input; i > 0; i--) {
+
+                // spaces
+                for (int j = 5; j > i; j--) {
+                    System.out.print(" ");
+                }
+                // stars
+                for (int k = 1; k <= i; k++) {
+                    System.out.print("*");
+                }
+
+                System.out.println();
+
+            }
+        }
+    }
+
+----------------------------------------------------------------------------------
+
+class EmailValidation {
+
+    public static void main(String[] args) {
+         System.out.println(isAlphanumeric('\''));
+         System.out.println(isValidPrefixChar('\''));
+         System.out.println(isValidDomainChar('\''));
+         System.out.println(exactlyOneAt("abc.def@gmail.com"));
+         System.out.println(getPrefix("pine@pple"));
+         System.out.println(getDomain("pine@pple"));
+         System.out.println(isValidPrefix("1com-*bz@gmail.com"));
+         System.out.println(isValidDomain("abc.def@gmail.ca"));
+         System.out.println(isValidEmail("1abc-def@1gmail.ca"));
+    }
+    // 1a) Method to check if a character is alphanumeric
+    public static boolean isAlphanumeric(char char1) {
+        if (!(char1 >= 'A' && char1 <= 'Z') && !(char1 >= 'a' && char1 <= 'z') && !(char1 >= '0' && char1 <= '9')) {
+            return false;
+        }
+        return true;
+    }
+    // 1b) Methods to check is a character is a valid prefix/domain character
+    // Check for valid prefix
+    public static boolean isValidPrefixChar(char char2) {
+        return (isAlphanumeric(char2)) || (char2 == '.') || (char2 == '_') || (char2 == '-');
+    }
+    // Check for valid domain (applies to the first portion)
+    public static boolean isValidDomainChar(char char3) {
+        return char3 == '-' || char3 == '.' || isAlphanumeric(char3);
+    }
+    // 1c) Method to check if a String contains exactly one ‘@’
+    public static boolean exactlyOneAt(String email) {
+        int count = 0;
+        for (int i = 0; i < email.length(); i++) {
+            if (email.charAt(i) == '@') {
+                count += 1;
+            }
+        }
+        if (count == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    // 1d) Method to get the prefix of a possible email address
+    public static String getPrefix(String email) {
+        String mail[] = email.split("@");
+        return mail[0].toString();
+    }
+    public static String getDomain(String email) {
+        String mail[] = email.split("@");
+        return mail[1].toString();
+    }
+    // 1e) Method to get the domain of a possible email address
+    public static boolean isValidPrefix(String email) {
+        String prefix = getPrefix(email);
+        // first and last character must be alphanumeric
+        if (!isAlphanumeric(prefix.charAt(0)) || !isAlphanumeric(prefix.charAt(prefix.length() - 1))) {
+            return false;
+        }
+        // prefix must be more than one character
+        if (prefix.length() >= 1) {
+            for (int i = 0; i < prefix.length(); i++) {
+                // actual character
+                char c = prefix.charAt(i);
+                if (!isValidPrefixChar(c)) {
+                    return false;
+                }
+                // following dash, period or underscore, it must be an alphanumeric character
+                if (c == '_' || c == '.' || c == '-'){
+                    // next character
+                    char nextC = prefix.charAt(i+1);
+                    if (!isAlphanumeric(nextC)){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    // 1f) Methods to check if the prefix and the domain are valid
+    public static boolean isValidDomain(String email) {
+        // check for abc@.com
+        String domain = getDomain(email);
+        String separator = ".";
+        int position = domain.lastIndexOf(separator);
+        if(position != -1) {
+            String portion1 = domain.substring(0, position);
+            String portion2 = domain.substring(position +1, domain.length());
+            // first and last character of the first portion must be alphanumeric
+            if (!isAlphanumeric(portion1.charAt(0)) || !isAlphanumeric(portion1.charAt(portion1.length() - 1))) {
+                return false;
+            }
+            // first portion has at least one character
+            if (portion1.length() >= 1){
+                for(int i = 0; i < portion1.length(); i++){
+                    char chr = portion1.charAt(i);
+                    // contains only alphanumeric, periods or dashes
+                    if(!isValidDomainChar(chr)){
+                        return false;
+                    }
+                    // following dash or period, it must be an alphanumeric character
+                    if ( chr == '.' || chr == '-'){
+                        // next character
+                        char nextChr = portion1.charAt(i+1);
+                        if (!isAlphanumeric(nextChr)){
+                            return false;
+                        }
+                    }
+                }
+            }
+            // second portion has at least 2 characters
+            if (portion2.length() < 2){
+                return false;
+            }
+            // second portion validations (only letters)
+            for(int i = 0; i < portion2.length(); i++){
+                char chr2 = portion2.charAt(i);
+                if (!(chr2 >= 'A' && chr2 <= 'Z') && !(chr2 >= 'a' && chr2 <= 'z')){
+                    return false;
+                }
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+    // 1g) Methods to check if a string is a valid email address
+    public static boolean isValidEmail(String email) {
+        if (isValidPrefix(email) && isValidDomain(email)) {
+            return true;
+        }
+        return false;
+    }
+}
+
