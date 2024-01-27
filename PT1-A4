@@ -1,0 +1,480 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+    public class BattleGame {
+
+
+
+
+        //The playGame() method takes two Strings as input containing the name of two files: the first
+        //containing the information about a player, the second containing the information about a monster.
+
+        public static void main(String[] args){
+            playGame("player.txt", "monster.txt");
+        }
+
+        private static void playGame(String fileNameOne, String fileNameTwo){
+
+            // Create the player and their enemy (the monster), using the readCharacter() method from the
+            // FileIO class and the inputs received. If the method does not return two valid references to
+            // objects of type Character, then print a message saying that the game cannot be played and
+            // terminate the method.
+
+
+            ArrayList<Spell> listSpells = FileIO.readSpells("spells.txt");
+
+            System.out.println(":: Players :: ");
+            Character player = FileIO.readCharacter(fileNameOne);
+            System.out.println(FileIO.readCharacter(fileNameOne));
+            System.out.println(":: Monster :: ");
+            Character enemy =  FileIO.readCharacter(fileNameTwo);
+            System.out.println(FileIO.readCharacter(fileNameTwo));
+
+
+            player.setSpells(listSpells);
+            System.out.println(":: Spells :: ");
+            for (int i = 0; i < listSpells.size(); i++) {
+                System.out.print(listSpells.get(i));
+            }
+
+
+            // Create a Scanner object to take input from the user.
+            // Until both the player and the monster have health above zero the method does the following:
+            // Ask the user for a command. For the moment, the only options will be attack and quit.
+            // Print a message that the input was not recognized and suggest the attack or quit commands.
+
+            while(player.getCurrentHealth() > 0 && enemy.getCurrentHealth() > 0){
+                Scanner in = new Scanner(System.in);
+                System.out.println("Enter a command :");
+                System.out.println("(Attack / Quit) ");
+                String userInput = in.nextLine();
+
+                // Repeat the above steps swapping the roles of the player and the monster (i.e. the monster
+                // should now be attacking the player back).
+
+                if (userInput.equalsIgnoreCase("attack")) {
+                    doAttack(player, enemy);
+                    doAttack(enemy, player);
+
+
+
+
+                } else if (userInput.equalsIgnoreCase("quit")) {
+                    System.out.println("Goodbye!");
+                    System.out.println("The user has quit the game");
+                    return;
+
+
+                } else if (!userInput.equalsIgnoreCase("attack") || userInput.equalsIgnoreCase("quit")) {
+                    double tempDamage = player.castSpell(userInput);
+                    System.out.println(enemy.getName() + " takes " + tempDamage + " damage!");
+                    enemy.takeDamage(tempDamage);
+                    System.out.println(enemy.getName() + " current health : " + enemy.getCurrentHealth());
+                    System.out.println();
+                }
+
+                // If the loop stops because one of the character’s health is zero or below, then that character
+                // is knocked out. Print an appropriate message either congratulating the player, or saying how
+                // they lost. Also make sure to increase the number of wins of either the player or the monster,
+                // depending on who won.
+
+            } if (player.getCurrentHealth() <= 0){
+                System.out.println("Failed, you lost the battle!");
+                enemy.increaseWins();
+                System.out.println(enemy.getName() + " number of wins : " + enemy.getNumWins());
+                FileIO.writeCharacter(enemy, "monster.txt");
+
+
+            } else if (enemy.getCurrentHealth() <= 0){
+                System.out.println("Congratulations, you won the battle!");
+                player.increaseWins();
+                System.out.println(player.getName() + " number of wins : " + player.getNumWins());
+                FileIO.writeCharacter(player, "player.txt");
+            }
+        }
+        // Print out a statement with the player’s name and how much damage they do. To make
+        // your output nicer, we suggest using a String formatting statement, though this is not
+        // necessary. For example, you could write this to only show two decimal places of the
+        // attack damage:
+        // String attackStr = String.format("%1$.2f", attack);,
+        // where attack is a variable containing the damage value.
+
+        // Display the information of the two characters in the game including: the character’s name,
+        // current health, attack value, and number of wins.
+
+        private static void doAttack(Character one, Character two) {
+            double attackValue = one.getAttackDamage();
+
+            System.out.println(one.getName() + " attacks for " + attackValue + " damage!");
+            two.takeDamage(attackValue);
+
+            if(two.getCurrentHealth() > 0){
+                System.out.println(two.getName() + " takes " + attackValue + " damage!");
+                System.out.println("Name : " + two.getName());
+                System.out.println("Health: " + two.getCurrentHealth() + "");
+            }else {
+                System.out.println(two.getName() + " takes " + attackValue + " damage!");
+                System.out.println("Name : " + two.getName());
+                System.out.println("Health: " + two.getCurrentHealth() + "");
+                System.out.println(two.getName() + " is KO.");
+            }
+        }
+
+
+    }
+
+--------------------------------------------------------------------------------
+
+import java.util.ArrayList;
+import java.util.Random;
+
+    public class Character {
+
+        private String name;
+        private double attack;
+        private double maxHealth;
+        private double currentHealth;
+        private int numWin;
+
+        // Add a private static attribute spells. This variable is an ArrayList which contains all the Spells
+        // that the characters can cast.
+        private static ArrayList<Spell> spells;
+
+        // A constructor: The constructor for the Character class takes one String, two doubles, and
+        // one int as input. These parameters represent the name, attack value, maximum health, and
+        // number of wins in the battle game for the character, in that order. Note that the current health
+        // of a new character is the same as the maximum health.
+
+        public Character(String name, double attack, double maxHealth, int numWin){
+            this.name = name;
+            this.attack = attack;
+            this.maxHealth = maxHealth;
+            this.currentHealth = maxHealth;
+            this.numWin = numWin;
+        }
+
+        // A getAttackDamage(): This method takes an integer as input and calculates how much attack
+        // damage one character does when they attack. The method uses the input to generate a
+        // Random object with the given input as seed. The method then computes the damage as follows:
+        // take the character’s attack value and multiply it by a random value between 0.7
+        // (inclusive) and 1.0 (exclusive).
+
+        // In this class, add a private static
+        // attribute of type Random and initialize it in place with a reference to a Random object created
+        // with no seed. (You can fix a seed for helping you debug your program if you want to)
+
+            public double getAttackDamage(){
+            Random randomNum = new Random(456);
+            double random = 0;
+            double min = 0.7;
+            double max = 1.0;
+            double range = max - min;
+
+            double attackValue = 0;
+            random = randomNum.nextDouble();
+            attackValue = min + (random * (range));
+            attackValue = attack * attackValue;
+
+            return attackValue;
+        }
+
+
+        // A takeDamage(): This method takes the damage done to this character as an input of type
+        // double. It then subtract this value from the character’s current health and returns a double
+        // indicating the current health of the character.
+        public void takeDamage(double attackValue){
+            this.currentHealth = this.currentHealth - attackValue;
+        }
+
+
+        // A increaseWins(): This method will increase the number of wins by the character by one,
+        //and does not return anything. This method will be called when the character wins the battle
+        //game.
+        public void increaseWins(){
+            this.numWin += 1;
+        }
+
+        // Add a setter method setSpells() for the spells attribute. The method takes an ArrayList of
+        // Spells as input, and copies the Spells contained in the input parameter to a new ArrayList
+        // stored in the spells attribute.
+
+        public void setSpells(ArrayList<Spell> spells){
+            this.spells = spells;
+        }
+
+
+
+
+        // Add a new method castSpell(), which takes the name of a spell to cast as input as well as an
+        // integer. This method returns a double indicating the damage done by the specified spell. To
+        // do so, you will have to search through the list of spell for the spell with the name matching
+        // the input. Note that you should ignore the capitalization of the spell name when matching. If
+        // the spell cannot be found, the method should return -1. Otherwise, the method returns the
+        // damage done by casting the specified spell.
+
+        public double castSpell(String spellName){
+            double damage = 0;
+            boolean checker = true;
+            for(int i = 0; i < this.spells.size(); i++){
+                System.out.println();
+
+                if(this.spells.get(i).getName().equalsIgnoreCase(spellName)){
+                    damage = this.spells.get(i).getMagicDamage();
+
+                    if(damage > 0){
+                        System.out.println(name + " casted " + spellName + " for damage of " + damage);
+                        checker = true;
+                        break;
+
+                    } else {
+                        System.out.println(name + " tried to cast " + spellName + ", but it failed.");
+                        checker = true;
+                        break;
+                    }
+
+                } else{
+                    checker = false;
+                }
+            } if (!checker){
+                System.out.println(name + " tried to cast " + spellName + ", but spell unknown.");
+            }
+            return damage;
+        }
+
+
+        // A toString() to returns a String consisting of the character’s name and current health. Format
+        //the String in any way you want. This method will be very handy for debugging your code, and
+        //will be used during the battle game to keep track of the health of each character.
+
+        public String toString(){
+            return "Caracter's name : " + name + "\n" + " [Health : " + currentHealth + "] \n [Attack Value : " + attack + "] \n [Number of Wins : " + numWin +"] \n";
+        }
+
+        // • A getName(), getAttackValue(), getMaxHealth(), getCurrHealth(), and getNumWins()
+        // to retrieve the corresponding attributes’ values.
+
+        public String getName() {
+            return this.name;
+        }
+
+        public Double getAttackValue() {
+            return this.attack;
+        }
+
+        public Double getMaxHealth() {
+            return this.maxHealth;
+        }
+
+        public Double getCurrentHealth() {
+            return this.currentHealth;
+        }
+
+        public int getNumWins() {
+            return this.numWin;
+        }
+
+
+    }
+
+----------------------------------------------------------------------------------------------------------
+
+import java.io.*;
+import java.util.ArrayList;
+
+    public class FileIO {
+
+        public FileIO() {
+
+        }
+        // A readCharacter(): This method takes as input a filename as a String parameter, and returns
+        // a new Character, using the constructor defined in the Character class. The readCharacter
+        // method must use a FileReader and a BufferedReader in order to open the file specified by
+        // the filename.
+        public static Character readCharacter(String fileName){
+
+            try{
+                FileReader fr = new FileReader(fileName);
+                BufferedReader br = new BufferedReader(fr);
+
+                String name = br.readLine();
+                double attack = Double.parseDouble(br.readLine());
+                double maxHealth = Double.parseDouble(br.readLine());
+                int numWin = Integer.parseInt(br.readLine());
+
+                br.close();
+                fr.close();
+
+                Character newUser = new Character(name, attack, maxHealth, numWin);
+                return newUser;
+
+                // Make sure to catch FileNotFoundException and IOException
+                // when reading from the file. If either exception is raised, print an appropriate error message and
+                // return null.
+
+            } catch (FileNotFoundException e){
+                throw new IllegalArgumentException("File not found:" + fileName);
+            } catch (IOException e){
+                throw new IllegalArgumentException("File error:" + fileName);
+            }
+
+        }
+
+
+        // Add a new public static method called readSpells(). This method takes a filename as input and
+        // returns an ArrayList of Spells.
+        // The method reads the file using FileReader and BufferedReader.
+        // You can assume that the files that readSpells() receives as input have all the same format: each
+        // spell is on one line, consisting of the spell name, the min damage, the max damage, and the chance
+        // for success each separated by a tab character. You can use the split() method from the String
+        // class to split each line of the file.
+
+        public static ArrayList<Spell> readSpells(String fileName){
+            ArrayList<Spell> spellInfo = new ArrayList<Spell>();
+
+            // Use the readLine() method of the BufferedReader to retrieve the content of the file.
+            // Use the information retrieved to create and return the appropriate object of type Character.
+
+            try{
+                FileReader fr2 = new FileReader(fileName);
+                BufferedReader br2 = new BufferedReader(fr2);
+
+                String currentLine = br2.readLine();
+
+                while(currentLine != null){
+                    String[] items = currentLine.split(" ");
+
+                    String name = items[0];
+
+                    double minDamage = Double.parseDouble(items[1]);
+                    double maxDamage = Double.parseDouble(items[2]);
+                    double chance = Double.parseDouble(items[3]);
+                    Spell temp = new Spell(name, minDamage, maxDamage, chance);
+
+                    spellInfo.add(temp);
+                    currentLine = br2.readLine();
+                }
+
+                br2.close();
+                fr2.close();
+
+                return spellInfo;
+
+                // Make sure to catch the IOException and FileNotFoundException exceptions.
+                // If either exception is raised print an appropriate error message and return null.
+
+            } catch (FileNotFoundException e){
+                throw new IllegalArgumentException("File not found:" + fileName);
+            } catch (IOException e){
+                throw new IllegalArgumentException("File error:" + fileName);
+            }
+
+        }
+
+
+        // In the FileIO class add a public static method named writeCharacter(). This method takes as
+        // input a Character to write, and a String which indicates the filename to write to.
+        // Within the writeCharacter() method, use FileWriter and BufferedWriter objects to write the
+        // character’s information back to a file.
+        // The format of the file must match the format that is expected when a character is read. That is,
+        // you should be able to write a character to a file, and then read a character from that same file.
+        // Recall that the format of a character in a file is:
+        // Name of the character
+        // Attack value
+        // Maximum health
+        // Number of wins so far in the battle game
+        // The above information appear on four different lines.
+        public static void writeCharacter (Character who, String fileName){
+
+            try{
+                FileWriter fw = new FileWriter(fileName);
+                BufferedWriter bw = new BufferedWriter(fw);
+
+                bw.write(who.getName() + "\n");
+                bw.write(who.getAttackValue() + "\n");
+                bw.write(who.getMaxHealth() + "\n");
+                bw.write(who.getNumWins() + "\n");
+
+                bw.close();
+                fw.close();
+
+                // Make sure to catch the IOException when writing a file and
+                // display an appropriate error message.
+
+            } catch (IOException e){
+                throw new IllegalArgumentException("File error:" + fileName);
+            }
+        }
+
+    }
+
+---------------------------------------------------------------------------------------------
+
+import java.util.Random;
+
+public class Spell {
+
+    //Write a class Spell.java. A Spell has the following private attributes:
+    //• A String name
+    //• A double minimum damage
+    //• A double maximum damage
+    //• A double chance of success for the spell (from 0 to 1)
+    private String name;
+    private double minDamage;
+    private double maxDamage;
+    private double chance;
+
+    // A constructor that takes as input the name, minimum and maximum damage, and chance
+    // of success for the spell. Note that, an IllegalArgumentException must be thrown if the
+    // minimum damage is less than 0 or greater than the maximum damage, or if the chance of
+    // success is less than zero or greater than one.
+
+    public Spell(String name, double minDamage, double maxDamage, double chance){
+        if (minDamage < 0 || minDamage > maxDamage || chance < 0 || chance > 1) {
+            throw new IllegalArgumentException("Wrong input");
+        }
+        this.name = name;
+        this.minDamage = minDamage;
+        this.maxDamage = maxDamage;
+        this.chance = chance;
+    }
+    // A getName() method which returns the name of the spell.
+    public String getName() {
+        return this.name;
+    }
+    // A getMagicDamage() method that returns the damage produced by the spell. The method
+    // takes an integer as input and uses it to generate a Random object with the input as the seed.
+    // The method then computes the damage as follows: first, a random number double between 0
+    // and 1 is generated. If the random number is above the chance of success, the spell fails, and
+    // 0 damage is returned. Otherwise, a random double between the minimum damage and the
+    // maximum damage is returned.
+    public double getMagicDamage() {
+
+        Random randomNum = new Random();
+        double random = 0;
+        double min = 0.;
+        double max = 1;
+        double range = max - min;
+
+        double spellAttack = 0;
+        random = randomNum.nextDouble();
+        spellAttack = min + (random * (range));
+
+        if(spellAttack > chance){
+            return 0;
+        } else {
+            return spellAttack;
+        }
+    }
+
+    // A toString() method. The String which is returned must contain the name, minimum and
+    // maximum damage, and the success chance as a percentage from 0 to 100 (so a chance of 0.5 is
+    // reported as 50.0
+    public String toString(){
+        return "Name of the spell : " + name + " | Minimum Damage : " + minDamage + " | Maximum Damage : " + maxDamage  + " | Success of Chance : " + chance*100 +"% \n";
+    }
+
+}
+
+
+
+
